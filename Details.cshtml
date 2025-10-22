@@ -1,0 +1,256 @@
+﻿@model ContractMonthlyClaimSystem.Models.Claim
+
+@{
+    ViewData["Title"] = $"Claim #{Model.ClaimId} Details";
+}
+
+<div class="row">
+    <div class="col-md-12 mb-3">
+        <a asp-action="MyClaims" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to My Claims
+        </a>
+    </div>
+</div>
+
+<!-- Status Progress Tracker -->
+<div class="card shadow mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="fas fa-tasks"></i> Claim Status Tracker</h4>
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="@(Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved ? "text-success" : "text-muted")">
+                    <i class="fas fa-check-circle fa-3x mb-2"></i>
+                    <h5>Completed</h5>
+                    @if (Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved)
+                    {
+                        <small class="text-success">Approved</small>
+                    }
+                    else if (Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected || 
+                             Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected)
+                    {
+                        <small class="text-danger">Rejected</small>
+                    }
+                    else
+                    {
+                        <small>In Progress...</small>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="progress mt-4" style="height: 25px;">
+            @{
+                var progressPercentage = Model.Status switch
+                {
+                    ContractMonthlyClaimSystem.Models.ClaimStatus.Pending => 25,
+                    ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorVerified => 50,
+                    ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected => 50,
+                    ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved => 100,
+                    ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected => 75,
+                    _ => 0
+                };
+                var progressColor = Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved ? "bg-success" :
+                                   (Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected || 
+                                    Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected) ? "bg-danger" : "bg-info";
+            }
+            <div class="progress-bar @progressColor" role="progressbar" style="width: @progressPercentage%">
+                @progressPercentage%
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Claim Details -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-light">
+                <h4 class="mb-0">Claim Information</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-hashtag"></i> Claim ID:</strong>
+                        <p class="text-muted">#@Model.ClaimId</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-calendar"></i> Month/Year:</strong>
+                        <p class="text-muted">@Model.MonthYear.ToString("MMMM yyyy")</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-user"></i> Lecturer:</strong>
+                        <p class="text-muted">@Model.LecturerName</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong><i class="fas fa-envelope"></i> Email:</strong>
+                        <p class="text-muted">@Model.LecturerEmail</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong><i class="fas fa-clock"></i> Hours Worked:</strong>
+                        <p class="text-muted">@Model.HoursWorked.ToString("N1") hours</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong><i class="fas fa-money-bill-wave"></i> Hourly Rate:</strong>
+                        <p class="text-muted">R @Model.HourlyRate.ToString("N2")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong><i class="fas fa-calculator"></i> Total Amount:</strong>
+                        <p class="text-primary"><strong>R @Model.TotalAmount.ToString("N2")</strong></p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+                {
+                    <div class="mb-3">
+                        <strong><i class="fas fa-comment"></i> Additional Notes:</strong>
+                        <p class="text-muted">@Model.AdditionalNotes</p>
+                    </div>
+                }
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <strong><i class="fas fa-info-circle"></i> Current Status:</strong>
+                        <p>
+                            @switch (Model.Status)
+                            {
+                                case ContractMonthlyClaimSystem.Models.ClaimStatus.Pending:
+                                    <span class="badge bg-warning text-dark fs-6">Pending Review</span>
+                                    break;
+                                case ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorVerified:
+                                    <span class="badge bg-info fs-6">Verified by Coordinator</span>
+                                    break;
+                                case ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved:
+                                    <span class="badge bg-success fs-6">Approved by Manager</span>
+                                    break;
+                                case ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected:
+                                    <span class="badge bg-danger fs-6">Rejected by Coordinator</span>
+                                    break;
+                                case ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected:
+                                    <span class="badge bg-danger fs-6">Rejected by Manager</span>
+                                    break;
+                            }
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Comments -->
+        @if (!string.IsNullOrEmpty(Model.CoordinatorComments) || !string.IsNullOrEmpty(Model.ManagerComments))
+        {
+            <div class="card shadow mb-4">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0">Review Comments</h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.CoordinatorComments))
+                    {
+                        <div class="mb-3">
+                            <strong><i class="fas fa-user-check"></i> Programme Coordinator:</strong>
+                            <p class="text-muted">@Model.CoordinatorComments</p>
+                            <small class="text-muted">@Model.CoordinatorReviewedAt?.ToString("dd MMMM yyyy HH:mm")</small>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ManagerComments))
+                    {
+                        <div class="mb-3">
+                            <strong><i class="fas fa-user-tie"></i> Academic Manager:</strong>
+                            <p class="text-muted">@Model.ManagerComments</p>
+                            <small class="text-muted">@Model.ManagerReviewedAt?.ToString("dd MMMM yyyy HH:mm")</small>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Uploaded Documents -->
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-paperclip"></i> Uploaded Documents</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Documents != null && Model.Documents.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var doc in Model.Documents)
+                        {
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fas @(doc.FileType == ".pdf" ? "fa-file-pdf text-danger" :
+                                                       doc.FileType == ".docx" ? "fa-file-word text-primary" :
+                                                       "fa-file-excel text-success")"></i>
+                                        <small>@doc.FileName</small>
+                                    </div>
+                                    <a asp-action="DownloadDocument" asp-route-id="@doc.DocumentId" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    @((doc.FileSize / 1024.0).ToString("N2")) KB | 
+                                    Uploaded: @doc.UploadedAt.ToString("dd MMM yyyy")
+                                </small>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted text-center">
+                        <i class="fas fa-folder-open fa-3x mb-2"></i><br />
+                        No documents uploaded
+                    </p>
+                }
+            </div>
+        </div>
+    </div>
+</div> >= ContractMonthlyClaimSystem.Models.ClaimStatus.Pending ? "text-primary" : "text-muted")">
+                    <i class="fas fa-paper-plane fa-3x mb-2"></i>
+                    <h5>Submitted</h5>
+                    <small>@Model.SubmittedAt.ToString("dd MMM yyyy HH:mm")</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="@(Model.Status >= ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorVerified ? "text-info" : 
+                             Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected ? "text-danger" : "text-muted")">
+                    <i class="fas @(Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.CoordinatorRejected ? "fa-times-circle" : "fa-user-check") fa-3x mb-2"></i>
+                    <h5>Coordinator Review</h5>
+                    @if (Model.CoordinatorReviewedAt.HasValue)
+                    {
+                        <small>@Model.CoordinatorReviewedAt.Value.ToString("dd MMM yyyy HH:mm")</small>
+                    }
+                    else
+                    {
+                        <small>Pending...</small>
+                    }
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="@(Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerApproved ? "text-success" : 
+                             Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected ? "text-danger" : "text-muted")">
+                    <i class="fas @(Model.Status == ContractMonthlyClaimSystem.Models.ClaimStatus.ManagerRejected ? "fa-times-circle" : "fa-user-tie") fa-3x mb-2"></i>
+                    <h5>Manager Review</h5>
+                    @if (Model.ManagerReviewedAt.HasValue)
+                    {
+                        <small>@Model.ManagerReviewedAt.Value.ToString("dd MMM yyyy HH:mm")</small>
+                    }
+                    else
+                    {
+                        <small>Pending...</small>
+                    }
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="@(Model.Status
