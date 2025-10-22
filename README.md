@@ -3,8 +3,8 @@ Contract Monthly Claim System (CMCS) - Part 2
 Student Name: Grace Agbor  
 Student Number: ST10066225  
 Module: PROG6212 - Programming 2B  
-GitHub Repository: https://github.com/IIEMSA/prog6212-part2-AgborGrace.git
-
+GitHub Repository: [https://github.com/IIEMSA/prog6212-part2-AgborGrace.git
+](https://github.com/AgborGrace/PROG6212-Part2-AgborGrace.git)
 ---
 
  Table of Contents
